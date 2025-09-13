@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Wellness Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .mood-icon {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .mood-icon:hover {
+            transform: scale(1.2);
+        }
+        .mood-icon.selected {
+            border: 3px solid #6366f1;
+            border-radius: 9999px;
+            padding: 0.5rem;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Student Wellness Monitor</h1>
+            <p class="text-lg text-gray-600">Your daily check-in for a healthier mind.</p>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Daily Mood Check-in Card -->
+            <div class="card">
+                <div class="p-3 mb-4 rounded-full bg-indigo-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">How are you feeling today?</h2>
+                <div id="mood-selector" class="flex justify-center space-x-6">
+                    <span class="mood-icon" data-mood="amazing">😊</span>
+                    <span class="mood-icon" data-mood="good">🙂</span>
+                    <span class="mood-icon" data-mood="okay">😐</span>
+                    <span class="mood-icon" data-mood="bad">🙁</span>
+                    <span class="mood-icon" data-mood="terrible">😞</span>
+                </div>
+            </div>
+
+            <!-- Journal and Sentiment Analysis Card -->
+            <div class="card col-span-1 md:col-span-2">
+                <div class="p-3 mb-4 rounded-full bg-teal-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232a2 2 0 013.313 1.956L18 7.5l-2.618 2.618a2 2 0 01-2.924-2.732l.732-.732zM12 18V6" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Write a few words about your day.</h2>
+                <textarea id="journal-entry" class="w-full h-32 p-4 border rounded-lg bg-gray-50 text-gray-800 resize-none mb-4" placeholder="e.g., I had a great day because..."></textarea>
+                <button id="analyze-btn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-md">
+                    Analyze My Day
+                </button>
+                <div id="sentiment-result" class="mt-4 text-lg font-semibold text-gray-700"></div>
+            </div>
+
+            <!-- Personalized Recommendations Card -->
+            <div class="card col-span-1 md:col-span-1">
+                <div class="p-3 mb-4 rounded-full bg-pink-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17.5a6 6 0 11-12 0 6 6 0 0112 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.828 17.5a6 6 0 11-12 0 6 6 0 0112 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Recommendations</h2>
+                <div id="recommendations-container" class="space-y-3 text-gray-700 w-full text-left">
+                    <p class="text-sm italic text-center">Recommendations will appear here after analysis.</p>
+                </div>
+            </div>
+
+            <!-- Trend Visualization Card -->
+            <div class="card col-span-1 lg:col-span-3">
+                <div class="p-3 mb-4 rounded-full bg-sky-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6m0 0a2 2 0 012-2h2a2 2 0 012 2m-8-2v2m-4-2v2m-4-2v2m-4-2v2" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Mood Trends</h2>
+                <div class="w-full h-64 bg-gray-50 rounded-lg p-2 flex items-center justify-center">
+                    <canvas id="mood-chart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Message Box for Alerts -->
+    <div id="message-box" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 m-4 w-96 max-w-full transform transition-transform duration-300">
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Notification</h3>
+            <p id="message-text" class="text-gray-600 mb-4"></p>
+            <button id="close-message-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const moodSelector = document.getElementById('mood-selector');
+            const journalEntry = document.getElementById('journal-entry');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const sentimentResult = document.getElementById('sentiment-result');
+            const recommendationsContainer = document.getElementById('recommendations-container');
+            const moodChartCanvas = document.getElementById('mood-chart');
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            const closeMessageBtn = document.getElementById('close-message-btn');
+
+            let chart;
+            let currentMood = null;
+            let moodHistory = [8, 9, 7, 6, 8, 5, 9]; // Simulated scores (1-10)
+
+            // --- Utility Functions ---
+            function showMessage(message) {
+                messageText.textContent = message;
+                messageBox.classList.remove('hidden');
+            }
+
+            closeMessageBtn.addEventListener('click', () => {
+                messageBox.classList.add('hidden');
+            });
+
+            // --- Mood Check-in Logic ---
+            moodSelector.addEventListener('click', (event) => {
+                if (event.target.classList.contains('mood-icon')) {
+                    document.querySelectorAll('.mood-icon').forEach(icon => {
+                        icon.classList.remove('selected');
+                    });
+                    event.target.classList.add('selected');
+                    currentMood = event.target.dataset.mood;
+                    showMessage(`You selected: ${currentMood.charAt(0).toUpperCase() + currentMood.slice(1)}`);
+                }
+            });
+
+            // --- Sentiment Analysis and Recommendations (Simulated) ---
+            analyzeBtn.addEventListener('click', () => {
+                const text = journalEntry.value.toLowerCase();
+                if (text.length < 10) {
+                    showMessage('Please write a bit more to get a good analysis!');
+                    return;
+                }
+
+                // Simple keyword-based sentiment simulation
+                let sentiment = 'neutral';
+                let recommendations = [];
+                const positiveWords = ['happy', 'great', 'good', 'excited', 'wonderful', 'fun', 'love', 'amazing', 'enjoy'];
+                const negativeWords = ['sad', 'bad', 'stressed', 'anxious', 'tired', 'down', 'difficult', 'frustrated'];
+
+                let positiveScore = positiveWords.filter(word => text.includes(word)).length;
+                let negativeScore = negativeWords.filter(word => text.includes(word)).length;
+
+                if (positiveScore > negativeScore) {
+                    sentiment = 'positive';
+                    recommendations = [
+                        'Keep up the great work! Your positive mindset is a powerful tool.',
+                        'Try a guided meditation for gratitude to reinforce your current feelings.'
+                    ];
+                } else if (negativeScore > positiveScore) {
+                    sentiment = 'negative';
+                    recommendations = [
+                        'It sounds like you are going through a tough time. It’s okay to feel this way.',
+                        'Consider taking a 15-minute break and going for a short walk to clear your head.',
+                        'Try some deep breathing exercises to help calm your nervous system.'
+                    ];
+                } else {
+                    sentiment = 'neutral';
+                    recommendations = [
+                        'Your feelings seem balanced today. This is a good time for a new learning activity.',
+                        'Try to write about something that makes you smile to shift your mood.'
+                    ];
+                }
+
+                sentimentResult.textContent = `Sentiment Analysis: ${sentiment.toUpperCase()}`;
+                
+                recommendationsContainer.innerHTML = '';
+                recommendations.forEach(rec => {
+                    const recElement = document.createElement('div');
+                    recElement.className = 'bg-gray-100 p-3 rounded-lg border-l-4 border-indigo-500';
+                    recElement.innerHTML = `<p class="text-sm">${rec}</p>`;
+                    recommendationsContainer.appendChild(recElement);
+                });
+                
+                // Update mood history for chart
+                const moodValue = positiveScore - negativeScore;
+                moodHistory.push(Math.max(1, Math.min(10, 5 + moodValue * 2)));
+                renderChart();
+
+                showMessage('Analysis complete!');
+            });
+
+            // --- Trend Visualization ---
+            function renderChart() {
+                if (chart) {
+                    chart.destroy();
+                }
+                const labels = moodHistory.map((_, i) => `Day ${i + 1}`);
+                chart = new Chart(moodChartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Mood Score (1-10)',
+                            data: moodHistory,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            title: {
+                                display: true,
+                                text: 'Your Mood Trend Over Time'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: {
+                                    color: '#e5e7eb'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            renderChart();
+        });
+    </script>
+</body>
+</html>
